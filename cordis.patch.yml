@@ -1,0 +1,13 @@
+# dsh-swarm-orchestrator bundle patch：把「并行子代理集群」装配进 profile。
+#
+# 平面选择（为什么是 host 行而不是 preset 行）：
+#   集群状态以「调用方 session id」为键、跨会话共享一个注册表，并且要消费 host 平面的
+#   `subagents` 单例（provider 名全局只能注册一次）。放进 preset 会让第二个会话撞名、
+#   也会让跨会话查询落空。所以编排器 + 三个模型工具都留在 host 平面，作为 profile 的
+#   一行；由此 register 到全局 tools 层，**任意对话、任意 preset 都能直接调用**。
+#
+# host 半边 = lib/index.js（编排器 + swarm_run/swarm_status/swarm_control + /api/swarm 路由）
+# client 半边由 package.json 的 dsh.client 声明装配（lib/client.js：输入框上方看板 + 设置页）
+- insert:
+    - id: swarm-orchestrator
+      name: dsh-swarm-orchestrator
